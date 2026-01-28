@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { WebhookInstructions } from '@/components/WebhookInstructions';
+import { ClientSupabaseConfig } from '@/components/ClientSupabaseConfig';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Save, TestTube, Copy, Check, Loader2, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
 interface MetaCredentials {
   pixel_id: string;
   page_id: string;
@@ -296,6 +296,9 @@ export default function Configuracao() {
             )}
           </CardContent>
         </Card>
+
+        {/* Client Supabase Configuration */}
+        <ClientSupabaseConfig />
       </div>
     </Layout>
   );
