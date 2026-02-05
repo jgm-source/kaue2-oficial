@@ -1,32 +1,45 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { 
   LayoutDashboard, 
   Settings, 
   LogOut, 
   Activity,
   Menu,
-  X
+  X,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  adminOnly?: boolean;
+}
+
+const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/configuracao', label: 'Configuração', icon: Settings },
+  { href: '/admin/webhooks', label: 'Admin', icon: Shield, adminOnly: true },
 ];
 
 export function Layout({ children }: LayoutProps) {
   const { signOut, user } = useAuth();
+  const { isAdmin } = useAdmin();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const filteredNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   const handleSignOut = async () => {
     await signOut();
@@ -55,7 +68,7 @@ export function Layout({ children }: LayoutProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
@@ -72,7 +85,8 @@ export function Layout({ children }: LayoutProps) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <span className="text-sm text-muted-foreground hidden sm:inline">
               {user?.email}
             </span>
@@ -88,7 +102,7 @@ export function Layout({ children }: LayoutProps) {
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-card border-b animate-fade-in">
           <nav className="container py-4 px-4 space-y-1">
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
