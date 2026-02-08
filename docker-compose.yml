@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  meta-events-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meta-events-manager
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - meta-events-network
+
+networks:
+  meta-events-network:
+    driver: bridge
