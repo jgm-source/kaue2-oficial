@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 interface Credentials {
   id?: number;
   'ID do Pixel': string;
+  'Page_ID': string;
   'Acess_Token': string;
 }
 
@@ -22,12 +23,15 @@ export default function Configuracao() {
   
   const [credentials, setCredentials] = useState<Credentials>({
     'ID do Pixel': '',
+    'Page_ID': '',
     'Acess_Token': '',
   });
   const [showToken, setShowToken] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedToken, setCopiedToken] = useState(false);
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
   const [credentialsId, setCredentialsId] = useState<number | null>(null);
+  const [webhookUrl, setWebhookUrl] = useState<string>('');
 
   useEffect(() => {
     fetchCredentials();
@@ -45,8 +49,10 @@ export default function Configuracao() {
       if (data) {
         setCredentials({
           'ID do Pixel': data['ID do Pixel']?.toString() || '',
+          'Page_ID': data['Page_ID']?.toString() || '',
           'Acess_Token': data['Acess_Token'] || '',
         });
+        setWebhookUrl(data['Webhook'] || '');
         setCredentialsId(data.id);
       }
     } catch (error: any) {
@@ -72,6 +78,7 @@ export default function Configuracao() {
           .from('Credenciais')
           .update({
             'ID do Pixel': parseFloat(credentials['ID do Pixel']),
+            'Page_ID': credentials['Page_ID'] ? parseFloat(credentials['Page_ID']) : null,
             'Acess_Token': credentials['Acess_Token'],
           })
           .eq('id', credentialsId);
@@ -83,6 +90,7 @@ export default function Configuracao() {
           .from('Credenciais')
           .insert({
             'ID do Pixel': parseFloat(credentials['ID do Pixel']),
+            'Page_ID': credentials['Page_ID'] ? parseFloat(credentials['Page_ID']) : null,
             'Acess_Token': credentials['Acess_Token'],
           })
           .select()
@@ -119,6 +127,18 @@ export default function Configuracao() {
     }
   };
 
+  const copyWebhook = () => {
+    if (webhookUrl) {
+      navigator.clipboard.writeText(webhookUrl);
+      setCopiedWebhook(true);
+      setTimeout(() => setCopiedWebhook(false), 2000);
+      toast({
+        title: 'Copiado!',
+        description: 'Webhook URL copiado para a área de transferência.',
+      });
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-8">
@@ -150,6 +170,16 @@ export default function Configuracao() {
                 placeholder="Ex: 123456789012345"
                 value={credentials['ID do Pixel']}
                 onChange={(e) => setCredentials({ ...credentials, 'ID do Pixel': e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="page_id">Page ID (opcional)</Label>
+              <Input
+                id="page_id"
+                placeholder="Ex: 123456789012345"
+                value={credentials['Page_ID']}
+                onChange={(e) => setCredentials({ ...credentials, 'Page_ID': e.target.value })}
               />
             </div>
 
@@ -199,6 +229,40 @@ export default function Configuracao() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Webhook URL Card - Somente Leitura */}
+        {webhookUrl && (
+          <Card className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <CardHeader>
+              <CardTitle>Webhook Configurado</CardTitle>
+              <CardDescription>
+                URL do webhook configurada no banco de dados
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label>Webhook URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={webhookUrl}
+                    readOnly
+                    className="font-mono text-sm bg-muted cursor-not-allowed"
+                  />
+                  <Button variant="outline" onClick={copyWebhook}>
+                    {copiedWebhook ? (
+                      <Check className="h-4 w-4 text-success" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Este campo é gerenciado diretamente no banco de dados
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );
