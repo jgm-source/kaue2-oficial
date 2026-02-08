@@ -14,7 +14,6 @@ interface Credentials {
   id?: number;
   'ID do Pixel': string;
   'Acess_Token': string;
-  'Webhook': string;
 }
 
 export default function Configuracao() {
@@ -24,11 +23,9 @@ export default function Configuracao() {
   const [credentials, setCredentials] = useState<Credentials>({
     'ID do Pixel': '',
     'Acess_Token': '',
-    'Webhook': '',
   });
   const [showToken, setShowToken] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [copiedToken, setCopiedToken] = useState(false);
   const [credentialsId, setCredentialsId] = useState<number | null>(null);
 
@@ -49,7 +46,6 @@ export default function Configuracao() {
         setCredentials({
           'ID do Pixel': data['ID do Pixel']?.toString() || '',
           'Acess_Token': data['Acess_Token'] || '',
-          'Webhook': data['Webhook'] || '',
         });
         setCredentialsId(data.id);
       }
@@ -77,7 +73,6 @@ export default function Configuracao() {
           .update({
             'ID do Pixel': parseFloat(credentials['ID do Pixel']),
             'Acess_Token': credentials['Acess_Token'],
-            'Webhook': credentials['Webhook'],
           })
           .eq('id', credentialsId);
 
@@ -89,7 +84,6 @@ export default function Configuracao() {
           .insert({
             'ID do Pixel': parseFloat(credentials['ID do Pixel']),
             'Acess_Token': credentials['Acess_Token'],
-            'Webhook': credentials['Webhook'],
           })
           .select()
           .single();
@@ -110,18 +104,6 @@ export default function Configuracao() {
       });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const copyWebhookUrl = () => {
-    if (credentials['Webhook']) {
-      navigator.clipboard.writeText(credentials['Webhook']);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      toast({
-        title: 'Copiado!',
-        description: 'URL do webhook copiada para a área de transferência.',
-      });
     }
   };
 
@@ -205,16 +187,6 @@ export default function Configuracao() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="webhook">Webhook URL</Label>
-              <Input
-                id="webhook"
-                placeholder="https://seu-webhook.com/endpoint"
-                value={credentials['Webhook']}
-                onChange={(e) => setCredentials({ ...credentials, 'Webhook': e.target.value })}
-              />
-            </div>
-
             <div className="flex gap-3 pt-2">
               <Button onClick={handleSave} disabled={isSaving} className="gradient-primary">
                 {isSaving ? (
@@ -227,42 +199,6 @@ export default function Configuracao() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Webhook URL Card */}
-        {credentials['Webhook'] && (
-          <Card className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <CardHeader>
-              <CardTitle>URL do Webhook Configurada</CardTitle>
-              <CardDescription>
-                Use esta URL para configurar o webhook na sua plataforma de pagamentos
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    value={credentials['Webhook']}
-                    readOnly
-                    className="font-mono text-sm bg-muted"
-                  />
-                  <Button variant="outline" onClick={copyWebhookUrl}>
-                    {copied ? (
-                      <Check className="h-4 w-4 text-success" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                <Alert className="bg-success/10 border-success/20">
-                  <Check className="h-4 w-4 text-success" />
-                  <AlertDescription className="text-success">
-                    Webhook conectado e pronto para receber eventos
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </Layout>
   );
